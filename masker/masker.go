@@ -9,6 +9,7 @@ import (
 
 type Masker interface {
 	Mask(data interface{}) interface{}
+	MaskInterface(data interface{}) interface{}
 }
 
 type DefaultMasker struct {
@@ -18,7 +19,7 @@ type DefaultMasker struct {
 	compiled bool
 }
 
-func New(opts ...Option) Masker {
+func NewWithOpts(opts ...Option) Masker {
 
 	var config Config
 	if len(opts) == 0 {
@@ -31,6 +32,17 @@ func New(opts ...Option) Masker {
 		opt(&config)
 	}
 
+	masker := &DefaultMasker{
+		patterns: config.Patterns,
+	}
+	masker.compilePatterns()
+
+	return masker
+}
+
+func New() Masker {
+
+	config := DefaultConfig()
 	masker := &DefaultMasker{
 		patterns: config.Patterns,
 	}
@@ -62,12 +74,14 @@ func (dm *DefaultMasker) Mask(data interface{}) interface{} {
 	return dm.processValue(data)
 }
 
+func (dm *DefaultMasker) MaskInterface(data interface{}) interface{} {
+	return dm.processInterface(data)
+}
+
 func (dm *DefaultMasker) processValue(value interface{}) interface{} {
 	switch v := value.(type) {
 	case string:
 		return dm.maskString(v)
-	case interface{}:
-		return dm.processInterface(v)
 	case map[string]interface{}:
 		return dm.processMap(v)
 	case []interface{}:
@@ -160,12 +174,17 @@ func StructToMap(obj interface{}) (map[string]interface{}, error) {
 }
 
 func MaskData(data interface{}, opts ...Option) interface{} {
-	masker := New(opts...)
+	masker := NewWithOpts(opts...)
 	return masker.Mask(data)
 }
 
+func MaskDataInterface(data interface{}, opts ...Option) interface{} {
+	masker := NewWithOpts(opts...)
+	return masker.MaskInterface(data)
+}
+
 func MaskString(data string, opts ...Option) string {
-	masker := New(opts...)
+	masker := NewWithOpts(opts...)
 	result := masker.Mask(data)
 	if str, ok := result.(string); ok {
 		return str

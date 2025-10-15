@@ -142,7 +142,7 @@ func TestPatternMatching(t *testing.T) {
 		},
 	}
 
-	masker := masker.New(masker.WithPatterns(customPatterns))
+	masker := masker.NewWithOpts(masker.WithPatterns(customPatterns))
 
 	tests := []struct {
 		name     string

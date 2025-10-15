@@ -3,7 +3,7 @@ package test
 import (
 	"strings"
 	"testing"
-	
+
 	"github.com/gocariq/go-sensitive/masker"
 	"github.com/stretchr/testify/assert"
 )
@@ -108,7 +108,7 @@ func TestMaskData_NestedMap(t *testing.T) {
 		},
 	}
 
-	mask := masker.New(masker.WithPatterns(customPatterns))
+	mask := masker.NewWithOpts(masker.WithPatterns(customPatterns))
 
 	input := map[string]interface{}{
 		"user": map[string]interface{}{
@@ -184,7 +184,7 @@ func TestMaskData_RealCase(t *testing.T) {
 		ExpirationDate: "12/2026",
 	}
 
-	result := masker.MaskData(input).(map[string]interface{})
+	result := masker.MaskDataInterface(input).(map[string]interface{})
 
 	assert.Equal(t, "4485********6312", result["accountNumber"])
 	assert.Equal(t, "12/2026", result["expirationDate"])
@@ -293,7 +293,7 @@ func TestMaskData_ComplexNestedStructure(t *testing.T) {
 		},
 	}
 
-	masker := masker.New(masker.WithPatterns(customPatterns))
+	masker := masker.NewWithOpts(masker.WithPatterns(customPatterns))
 
 	input := map[string]interface{}{
 		"users": []interface{}{
@@ -417,7 +417,7 @@ func TestNewMasker_WithCustomPatterns(t *testing.T) {
 		},
 	}
 
-	mask := masker.New(masker.WithPatterns(customPatterns))
+	mask := masker.NewWithOpts(masker.WithPatterns(customPatterns))
 
 	input := map[string]interface{}{
 		"custom_id": "ID-123-456",
@@ -469,7 +469,7 @@ func TestMaskData_ConcurrentAccess(t *testing.T) {
 		},
 	}
 
-	mask := masker.New(masker.WithPatterns(customPatterns))
+	mask := masker.NewWithOpts(masker.WithPatterns(customPatterns))
 
 	input := map[string]interface{}{
 		"card":  "4111-1111-1111-1111",
