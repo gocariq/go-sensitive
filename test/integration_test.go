@@ -51,7 +51,7 @@ func TestIntegration_ComplexBusinessObject(t *testing.T) {
 }
 
 func TestIntegration_MultipleCustomPatterns(t *testing.T) {
-	customMasker := masker.New(
+	customMasker := masker.NewWithOpts(
 		masker.WithCustomPattern("ip_address", `\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}`, func(s string) string {
 			return "***.***.***.***"
 		}),
