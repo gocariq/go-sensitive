@@ -3,10 +3,26 @@ package test
 import (
 	"strings"
 	"testing"
-
-	masker "github.com/gocariq/go-sensitive/masker"
+	
+	"github.com/gocariq/go-sensitive/masker"
 	"github.com/stretchr/testify/assert"
 )
+
+type BaseRequest struct {
+	ClientID  string `json:"clientId"`
+	MessageID string `json:"messageId"`
+	BuyerID   string `json:"buyerId"`
+}
+
+type AddFundingAccountRequest struct {
+	BaseRequest
+	AccountNumber  string  `json:"accountNumber"`
+	BuyerID        string  `json:"buyerId"`
+	DefaultAccount bool    `json:"defaultAccount"`
+	CurrencyCode   string  `json:"currencyCode"`
+	CreditLimit    float64 `json:"creditLimit"`
+	ExpirationDate string  `json:"expirationDate"`
+}
 
 func TestMaskData_SimpleString(t *testing.T) {
 	tests := []struct {
@@ -155,6 +171,24 @@ func TestMaskData_SliceOfMaps(t *testing.T) {
 	assert.Equal(t, "test1@example.com", result[0]["email"])
 	assert.Equal(t, "5500********0004", result[1]["card"])
 	assert.Equal(t, "test2@example.com", result[1]["email"])
+}
+
+func TestMaskData_RealCase(t *testing.T) {
+	input := AddFundingAccountRequest{
+		AccountNumber: "4485990014106312",
+		BaseRequest: BaseRequest{
+			BuyerID:   "5232025",
+			ClientID:  "B2BWS_4_9_4477",
+			MessageID: "b6fedaf6-02cf-4ce4-bbaa-1af85e822e30",
+		},
+		ExpirationDate: "12/2026",
+	}
+
+	result := masker.MaskData(input).(map[string]interface{})
+
+	assert.Equal(t, "4485********6312", result["accountNumber"])
+	assert.Equal(t, "12/2026", result["expirationDate"])
+	assert.Equal(t, "B2BWS_4_9_4477", result["clientId"])
 }
 
 func TestMaskData_InterfaceMap(t *testing.T) {

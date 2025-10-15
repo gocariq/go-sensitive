@@ -1,6 +1,7 @@
 package masker
 
 import (
+	"encoding/json"
 	"regexp"
 	"strings"
 	"sync"
@@ -65,6 +66,8 @@ func (dm *DefaultMasker) processValue(value interface{}) interface{} {
 	switch v := value.(type) {
 	case string:
 		return dm.maskString(v)
+	case interface{}:
+		return dm.processInterface(v)
 	case map[string]interface{}:
 		return dm.processMap(v)
 	case []interface{}:
@@ -129,6 +132,31 @@ func (dm *DefaultMasker) maskString(s string) string {
 		}
 		return match
 	})
+}
+
+func (dm *DefaultMasker) processInterface(v interface{}) map[string]interface{} {
+	data, _ := StructToMap(v)
+
+	result := make(map[string]interface{})
+	for key, value := range data {
+		result[key] = dm.processValue(value)
+	}
+	return result
+}
+
+func StructToMap(obj interface{}) (map[string]interface{}, error) {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func MaskData(data interface{}, opts ...Option) interface{} {
