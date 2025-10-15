@@ -56,7 +56,7 @@ func TestWithPatterns(t *testing.T) {
 }
 
 func TestMaskerWithCustomOptions(t *testing.T) {
-	customMasker := masker.New(
+	customMasker := masker.NewWithOpts(
 		masker.WithCustomPattern("zip_code", `\d{5}-\d{3}`, func(s string) string {
 			return "*****-***"
 		}),
